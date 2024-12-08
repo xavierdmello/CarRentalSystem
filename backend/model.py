@@ -25,11 +25,6 @@ class RentalStatus(enum.Enum):
     completed = "completed"
     canceled = "canceled"
 
-class PaymentStatus(enum.Enum):
-    successful = "successful"
-    failed = "failed"
-    pending = "pending"
-
 class PaymentMethod(enum.Enum):
     credit_card = "credit_card"
     debit_card = "debit_card"
@@ -89,7 +84,7 @@ class Payment(Base):
     amount = Column(DECIMAL(10, 2), nullable=False)
     payment_date = Column(TIMESTAMP, default=datetime.now(timezone.utc))
     payment_method = Column(Enum(PaymentMethod), nullable=False)
-    status = Column(Enum(PaymentStatus), default=PaymentStatus.successful)
+    
 
     rental = relationship('Rental', back_populates='payments')
 

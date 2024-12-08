@@ -38,3 +38,33 @@ def book_car(rental: CarBookRequest, user_id:int, db: Session):
         )
     finally:
         db.close()
+
+def get_ongoing_rentals(db:Session):
+    try:
+        rentals = db.query(Rental).filter(Rental.status == "ongoing").all()
+        return rentals
+    except HTTPException as ep:
+        raise ep
+    except Exception as ep:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(ep))
+    finally:
+        db.close()
+
+def return_rental(rental_id:int, db: Session):
+    try:
+        return_rental = db.query(Rental).filter(Rental.rental_id == rental_id).first()
+        if not return_rental:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Rental not found")
+        
+        return_rental.status = "completed"
+        
+
+        db.commit()
+        db.refresh(return_rental)
+
+        return return_rental
+    except HTTPException as ep:
+        raise ep
+    except Exception as ep:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(ep))
+    

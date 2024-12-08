@@ -1,11 +1,13 @@
 from fastapi import FastAPI, status, Depends,HTTPException,Header
 from backend.schemas.user import ResponseModel, UserCreate,UserLogin
 from backend.schemas.car import CarResponse, carFilterParams,CarResponseModel,CarCreate,CarBookRequest
+from backend.schemas.payment import PaymentAdd
 from sqlalchemy.orm import Session
 from backend.db import get_db
 from backend.services import user_service
 from backend.services import car_service
 from backend.services import rental_service
+from backend.services import payment_service
 from backend.services.auth import authenticated,get_current_user
 from backend.model import Car
 from typing import Optional
@@ -72,10 +74,47 @@ def delete_car(car_id: int,token:str = Header(), db: Session = Depends(get_db)):
     db.commit()
     return {"status":200,"success":True,"message":"car created successfully"}
 
-@app.post("/book_car/")
+@app.post("/book_rental/")
 def book_car(rental:CarBookRequest,token:str = Header(), db: Session = Depends(get_db)):
     user_id = get_current_user(token).user_id
     car_book=rental_service.book_car(rental,user_id, db)
     if not car_book:
         raise HTTPException(status_code=400, detail="car not booked")
     return {"status":200,"success":True,"message":"car booked successfully","data":car_book}
+
+@app.get("/ongoing_rentals/")
+@authenticated(roles=["admin"])
+def get_ongoing_rentals(token:str = Header(),db: Session = Depends(get_db)):
+    rentals = rental_service.get_ongoing_rentals(db)
+    if not rentals:
+        raise HTTPException(status_code=400, detail="rentals not fetched")
+    return {"status":200,"success":True,"message":"Rentals fetched successfully","data":rentals}
+
+@app.put("/car_return/")
+@authenticated(roles=["admin"])
+def car_return(rental_id:int, token: str = Header(), db: Session = Depends(get_db)):    
+    return_rental =  rental_service.return_rental(rental_id, db)
+    if not return_rental:
+        raise HTTPException(status_code=400, detail="Return not placed")
+    
+    return {
+        "status": 200,
+        "success": True,
+        "message": "Rental returned successfully",
+        "data": return_rental
+    }
+
+@app.post("/add_payment/", status_code=status.HTTP_201_CREATED)
+def add_payment(pay: PaymentAdd, db: Session = Depends(get_db)):
+    payment = payment_service.add_payment(pay, db)
+    if not payment:
+        raise HTTPException(status_code=400, detail="Payment not found")
+    return {"status":201,"success":True,"message":"Payment added successfully","data":payment}
+
+@app.get("/get_payments/")
+@authenticated(roles=["admin"])
+def get_payments(token:str = Header(),db: Session = Depends(get_db)):
+    payments = payment_service.get_payments(db)
+    if not payments:
+        raise HTTPException(status_code=400, detail="rentals not fetched")
+    return {"status":200,"success":True,"message":"Payments fetched successfully","data":payments}
