@@ -18,6 +18,7 @@ class CarCategory(enum.Enum):
     budget = "budget"
     mid = "mid-range"
     luxury = "luxury"
+    ev = "EV"
 
 class RentalStatus(enum.Enum):
     ongoing = "ongoing"
