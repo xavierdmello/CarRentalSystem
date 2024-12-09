@@ -20,13 +20,24 @@ function App() {
   const handleLogin = (data: UserData) => {
     setUserData(data);
     setRole(data.role === "admin" ? "admin" : "user");
-    // Store token in localStorage for persistence
     localStorage.setItem("token", data.access_token);
+  };
+
+  const handleLogout = () => {
+    setUserData(null);
+    setRole("user");
+    localStorage.removeItem("token");
   };
 
   return (
     <ThemeProvider defaultTheme="light" storageKey="ui-theme">
-      <Header role={role} setRole={setRole} onLogin={handleLogin} />
+      <Header 
+        role={role} 
+        setRole={setRole} 
+        onLogin={handleLogin} 
+        onLogout={handleLogout}
+        userData={userData}
+      />
       <div className="bg-background">
         <h1>Hello {userData ? userData.name : "World"}</h1>
       </div>
