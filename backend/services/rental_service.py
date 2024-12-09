@@ -10,6 +10,10 @@ def book_car(rental: CarBookRequest, user_id:int, db: Session):
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Car not found"
         )
+    car.status = "rented"
+    db.commit()
+    db.refresh(car)
+    
     rental_days = (rental.return_date - rental.rental_date).days
     if rental_days <= 0:
         raise HTTPException(

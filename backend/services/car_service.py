@@ -5,7 +5,7 @@ from fastapi import HTTPException,status
 
 def get_filtered_cars(filters: carFilterParams, db: Session):
     try:
-        query = db.query(Car)
+        query = db.query(Car).filter(Car.status=="available")
         
         if filters.make:
             query = query.filter(Car.make == filters.make)
