@@ -47,12 +47,14 @@ function App() {
     setUserData(data);
     setRole(data.role === "admin" ? "admin" : "user");
     localStorage.setItem("token", data.access_token);
+    setRefreshTrigger(prev => prev + 1);
   };
 
   const handleLogout = () => {
     setUserData(null);
     setRole("user");
     localStorage.removeItem("token");
+    setRefreshTrigger(prev => prev + 1);
   };
 
   const handleCarAdded = () => {
