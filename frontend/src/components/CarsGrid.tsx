@@ -283,7 +283,14 @@ export function CarsGrid({
             <h2 className="text-2xl font-bold mb-4">Your Rentals</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {rentals.map((rental) => (
-                <RentalCard key={rental.rental_id} rental={rental} />
+                <RentalCard
+                  key={rental.rental_id}
+                  rental={rental}
+                  onReturn={() => {
+                    fetchCars();
+                    fetchRentals();
+                  }}
+                />
               ))}
             </div>
           </div>

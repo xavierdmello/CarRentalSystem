@@ -60,17 +60,27 @@ def return_rental(rental_id:int, db: Session):
         if not return_rental:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Rental not found")
         
+        # Update rental status
         return_rental.status = "completed"
         
+        # Update car status back to available
+        car = db.query(Car).filter(Car.car_id == return_rental.car_id).first()
+        if car:
+            car.status = "available"
 
         db.commit()
         db.refresh(return_rental)
+        if car:
+            db.refresh(car)
 
         return return_rental
     except HTTPException as ep:
         raise ep
     except Exception as ep:
+        db.rollback()
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(ep))
+    finally:
+        db.close()
 
 def get_user_rentals(user_id: int, db: Session):
     try:

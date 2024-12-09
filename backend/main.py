@@ -105,8 +105,8 @@ def get_ongoing_rentals(token:str = Header(),db: Session = Depends(get_db)):
 
 @app.put("/car_return/")
 @authenticated(roles=["admin"])
-def car_return(rental_id:int, token: str = Header(), db: Session = Depends(get_db)):    
-    return_rental =  rental_service.return_rental(rental_id, db)
+def car_return(rental_data: dict, token: str = Header(), db: Session = Depends(get_db)):    
+    return_rental = rental_service.return_rental(rental_data["rental_id"], db)
     if not return_rental:
         raise HTTPException(status_code=400, detail="Return not placed")
     

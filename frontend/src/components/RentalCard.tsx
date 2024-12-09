@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -8,6 +9,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Car } from "lucide-react";
 import { format } from "date-fns";
+import { useToast } from "@/hooks/use-toast";
 
 interface RentalCardProps {
   rental: {
@@ -25,9 +27,48 @@ interface RentalCardProps {
     total_cost: number;
     status: string;
   };
+  onReturn?: () => void;
 }
 
-export function RentalCard({ rental }: RentalCardProps) {
+export function RentalCard({ rental, onReturn }: RentalCardProps) {
+  const { toast } = useToast();
+
+  const handleReturn = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch(`http://localhost:8000/car_return/`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          token: token || "",
+        },
+        body: JSON.stringify({
+          rental_id: rental.rental_id
+        })
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.detail || "Failed to return car");
+      }
+
+      toast({
+        title: "Car Returned Successfully",
+        description: `Thank you for returning the ${rental.car.make} ${rental.car.model}.`,
+      });
+      
+      if (onReturn) {
+        onReturn();
+      }
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Error Returning Car",
+        description: error instanceof Error ? error.message : "Failed to return car",
+      });
+    }
+  };
+
   return (
     <Card className="overflow-hidden">
       <CardHeader className="p-0">
@@ -66,6 +107,17 @@ export function RentalCard({ rental }: RentalCardProps) {
           <p>Return Date: {format(new Date(rental.return_date), 'MMM dd, yyyy')}</p>
         </div>
       </CardContent>
+      <CardFooter>
+        {rental.status === "ongoing" && (
+          <Button 
+            className="w-full" 
+            variant="secondary"
+            onClick={handleReturn}
+          >
+            Return Car
+          </Button>
+        )}
+      </CardFooter>
     </Card>
   );
 }
