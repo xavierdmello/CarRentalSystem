@@ -7,6 +7,7 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Car } from "lucide-react";
+import { format } from "date-fns";
 
 interface RentalCardProps {
   rental: {
@@ -16,6 +17,8 @@ interface RentalCardProps {
       model: string;
       image_url?: string;
       daily_rent: number;
+      year?: number;
+      category?: string;
     };
     rental_date: string;
     return_date: string;
@@ -49,15 +52,18 @@ export function RentalCard({ rental }: RentalCardProps) {
         </div>
       </CardHeader>
       <CardContent className="p-4">
-        <CardTitle className="flex justify-between items-center">
+        <CardTitle className="flex justify-between items-center mb-2">
           <span>
             {rental.car?.make} {rental.car?.model}
           </span>
           <span className="text-xl font-bold">${rental.total_cost}</span>
         </CardTitle>
         <div className="mt-2 space-y-1 text-sm text-muted-foreground">
-          <p>From: {new Date(rental.rental_date).toLocaleDateString()}</p>
-          <p>To: {new Date(rental.return_date).toLocaleDateString()}</p>
+          {rental.car?.year && <p>Year: {rental.car.year}</p>}
+          {rental.car?.category && <p>Category: {rental.car.category}</p>}
+          <p>Daily Rate: ${rental.car?.daily_rent}/day</p>
+          <p>Rental Date: {format(new Date(rental.rental_date), 'MMM dd, yyyy')}</p>
+          <p>Return Date: {format(new Date(rental.return_date), 'MMM dd, yyyy')}</p>
         </div>
       </CardContent>
     </Card>

@@ -74,10 +74,34 @@ def return_rental(rental_id:int, db: Session):
 
 def get_user_rentals(user_id: int, db: Session):
     try:
-        rentals = db.query(Rental).filter(Rental.user_id == user_id).all()
-        return rentals
-    except HTTPException as ep:
-        raise ep
+        rentals = (
+            db.query(Rental)
+            .join(Rental.car)
+            .filter(Rental.user_id == user_id)
+            .all()
+        )
+        
+        # Format the response to include all car details
+        formatted_rentals = []
+        for rental in rentals:
+            formatted_rental = {
+                "rental_id": rental.rental_id,
+                "rental_date": rental.rental_date,
+                "return_date": rental.return_date,
+                "total_cost": float(rental.total_cost),
+                "status": rental.status.value,
+                "car": {
+                    "make": rental.car.make,
+                    "model": rental.car.model,
+                    "year": rental.car.year,
+                    "category": rental.car.category.value,
+                    "image_url": rental.car.image_url,
+                    "daily_rent": float(rental.car.daily_rent)
+                }
+            }
+            formatted_rentals.append(formatted_rental)
+            
+        return formatted_rentals
     except Exception as ep:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, 
