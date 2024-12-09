@@ -20,7 +20,13 @@ interface FilterParams {
   category?: string;
 }
 
-export function CarsGrid({ onRefresh }: { onRefresh?: () => void | number }) {
+export function CarsGrid({
+  onRefresh,
+  isAdmin,
+}: {
+  onRefresh?: () => void | number;
+  isAdmin?: boolean;
+}) {
   const [cars, setCars] = useState<Car[]>([]);
   const [rentals, setRentals] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -38,14 +44,20 @@ export function CarsGrid({ onRefresh }: { onRefresh?: () => void | number }) {
       setIsLoading(true);
       // Build query parameters
       const params = new URLSearchParams();
-      if (filters.make && filters.make !== "all") params.append("make", filters.make);
-      if (filters.model && filters.model !== "all") params.append("model", filters.model);
-      if (filters.year && filters.year !== "all") params.append("year", filters.year.toString());
-      if (filters.category && filters.category !== "all") params.append("category", filters.category);
+      if (filters.make && filters.make !== "all")
+        params.append("make", filters.make);
+      if (filters.model && filters.model !== "all")
+        params.append("model", filters.model);
+      if (filters.year && filters.year !== "all")
+        params.append("year", filters.year.toString());
+      if (filters.category && filters.category !== "all")
+        params.append("category", filters.category);
 
       const queryString = params.toString();
-      const url = `http://localhost:8000/view_cars/${queryString ? `?${queryString}` : ""}`;
-      
+      const url = `http://localhost:8000/view_cars/${
+        queryString ? `?${queryString}` : ""
+      }`;
+
       const response = await fetch(url);
       const data: CarsResponse = await response.json();
 
@@ -214,7 +226,9 @@ export function CarsGrid({ onRefresh }: { onRefresh?: () => void | number }) {
                 <SelectItem value="all">All Categories</SelectItem>
                 {categories.map((category) => (
                   <SelectItem key={category} value={category}>
-                    {category === "ev" ? "EV" : category.charAt(0).toUpperCase() + category.slice(1)}
+                    {category === "ev"
+                      ? "EV"
+                      : category.charAt(0).toUpperCase() + category.slice(1)}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -222,10 +236,15 @@ export function CarsGrid({ onRefresh }: { onRefresh?: () => void | number }) {
           </div>
         </div>
         <div className="flex justify-end">
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             onClick={resetFilters}
-            disabled={!filters.make && !filters.model && !filters.year && !filters.category}
+            disabled={
+              !filters.make &&
+              !filters.model &&
+              !filters.year &&
+              !filters.category
+            }
           >
             Reset Filters
           </Button>
@@ -238,6 +257,7 @@ export function CarsGrid({ onRefresh }: { onRefresh?: () => void | number }) {
             <CarCard
               key={car.car_id}
               car={car}
+              isAdmin={isAdmin}
               onRented={() => {
                 fetchCars();
                 fetchRentals();

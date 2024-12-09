@@ -74,7 +74,7 @@ function App() {
       />
       <main className="container mx-auto">
         {role === "admin" && <AdminControls onCarAdded={handleCarAdded} />}
-        <CarsGrid onRefresh={refreshTrigger} />
+        <CarsGrid onRefresh={refreshTrigger} isAdmin={role === "admin"} />
       </main>
     </ThemeProvider>
   );
