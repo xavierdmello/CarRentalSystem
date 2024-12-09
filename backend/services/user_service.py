@@ -1,7 +1,7 @@
 from backend.schemas.user import UserCreate, UserLogin
 from sqlalchemy.orm import Session
 from fastapi import HTTPException, status
-from backend.model import User
+from backend.model import User, Role
 from backend.services.password import get_password_hash, verify_password
 from backend.services.auth import create_jwt_token
 import traceback
@@ -15,6 +15,10 @@ def register_user(user: UserCreate, db: Session):
             db_user = db.query(User).filter(User.email == user.email).first()
             if db_user:
                 raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email already registered")
+            
+            # Validate role
+            if user.role not in ["customer", "admin"]:
+                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid role")
 
             hashed_password = get_password_hash(user.password)
             new_user = User(
@@ -22,15 +26,14 @@ def register_user(user: UserCreate, db: Session):
                 email=user.email,
                 password_hash=hashed_password,
                 phone_number=user.phone,
-                address = user.address
-                
+                address=user.address,
+                role=Role(user.role)  # Convert string to Role enum
             )
             db.add(new_user)
             db.commit()
             db.refresh(new_user)
 
-            user_data =  UserLogin(email=new_user.email, password=user.password)
-
+            user_data = UserLogin(email=new_user.email, password=user.password)
             token_data = login_user(user_data, db=db)
 
             return token_data

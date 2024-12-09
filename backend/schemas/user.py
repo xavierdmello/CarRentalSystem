@@ -22,6 +22,7 @@ class UserCreate(BaseModel):
     address: str
     password: str
     phone: str
+    role: str = "customer"  # Default to customer
 
 class UserLogin(BaseModel):
     email: str
