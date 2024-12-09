@@ -18,6 +18,7 @@ interface UserData {
 function App() {
   const [role, setRole] = useState<"admin" | "user">("user");
   const [userData, setUserData] = useState<UserData | null>(null);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -54,6 +55,10 @@ function App() {
     localStorage.removeItem("token");
   };
 
+  const handleCarAdded = () => {
+    setRefreshTrigger(prev => prev + 1);
+  };
+
   return (
     <ThemeProvider defaultTheme="light" storageKey="ui-theme">
       <Header 
@@ -64,8 +69,8 @@ function App() {
         userData={userData}
       />
       <main className="container mx-auto">
-        {role === "admin" && <AdminControls />}
-        <CarsGrid />
+        {role === "admin" && <AdminControls onCarAdded={handleCarAdded} />}
+        <CarsGrid onRefresh={refreshTrigger} />
       </main>
     </ThemeProvider>
   );

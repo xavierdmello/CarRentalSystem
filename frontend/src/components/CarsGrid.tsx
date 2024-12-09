@@ -2,33 +2,34 @@ import { useEffect, useState } from "react";
 import { Car, CarsResponse } from "@/types/car";
 import { CarCard } from "./CarCard";
 
-export function CarsGrid() {
+export function CarsGrid({ onRefresh }: { onRefresh?: () => void }) {
   const [cars, setCars] = useState<Car[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchCars = async () => {
-      try {
-        const response = await fetch("http://localhost:8000/view_cars/");
-        const data: CarsResponse = await response.json();
-        
-        if (!response.ok) {
-          throw new Error(data.message || "Failed to fetch cars");
-        }
-
-        if (data.success) {
-          setCars(data.data);
-        }
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Failed to fetch cars");
-      } finally {
-        setIsLoading(false);
+  const fetchCars = async () => {
+    try {
+      setIsLoading(true);
+      const response = await fetch("http://localhost:8000/view_cars/");
+      const data: CarsResponse = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to fetch cars");
       }
-    };
 
+      if (data.success) {
+        setCars(data.data);
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to fetch cars");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchCars();
-  }, []);
+  }, [onRefresh]);
 
   if (isLoading) {
     return (

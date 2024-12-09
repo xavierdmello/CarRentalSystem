@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label";
 import { useState } from "react";
 import { CarCreate } from "@/types/car";
 
-export function AdminControls() {
+export function AdminControls({ onCarAdded }: { onCarAdded: () => void }) {
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
@@ -23,7 +23,7 @@ export function AdminControls() {
     status: "available",
     daily_rent: 0,
     image_url: "",
-    category: "budget"
+    category: "budget",
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -37,7 +37,7 @@ export function AdminControls() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "token": token || "",
+          token: token || "",
         },
         body: JSON.stringify(carData),
       });
@@ -49,7 +49,6 @@ export function AdminControls() {
 
       if (data.success) {
         setIsOpen(false);
-        // Reset form
         setCarData({
           make: "",
           model: "",
@@ -58,10 +57,9 @@ export function AdminControls() {
           status: "available",
           daily_rent: 0,
           image_url: "",
-          category: "budget"
+          category: "budget",
         });
-        // Optionally refresh the car list
-        window.location.reload();
+        onCarAdded();
       }
     } catch (error) {
       setError(error instanceof Error ? error.message : "Failed to add car");
@@ -128,7 +126,10 @@ export function AdminControls() {
                 disabled={isLoading}
                 value={carData.registration_number}
                 onChange={(e) =>
-                  setCarData({ ...carData, registration_number: parseInt(e.target.value) })
+                  setCarData({
+                    ...carData,
+                    registration_number: parseInt(e.target.value),
+                  })
                 }
               />
             </div>
@@ -141,7 +142,10 @@ export function AdminControls() {
                 disabled={isLoading}
                 value={carData.daily_rent}
                 onChange={(e) =>
-                  setCarData({ ...carData, daily_rent: parseInt(e.target.value) })
+                  setCarData({
+                    ...carData,
+                    daily_rent: parseInt(e.target.value),
+                  })
                 }
               />
             </div>
@@ -171,7 +175,7 @@ export function AdminControls() {
                 <option value="budget">Budget</option>
                 <option value="mid-range">Mid Range</option>
                 <option value="luxury">Luxury</option>
-                <option value="EV">EV</option>
+                <option value="ev">EV</option>
               </select>
             </div>
             <Button type="submit" className="w-full" disabled={isLoading}>
@@ -182,4 +186,4 @@ export function AdminControls() {
       </Dialog>
     </div>
   );
-} 
+}
