@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { PaymentsTable } from "./PaymentsTable";
 
 interface FilterParams {
   make?: string;
@@ -294,6 +295,13 @@ export function CarsGrid({
               ))}
             </div>
           </div>
+        </>
+      )}
+
+      {isAdmin && (
+        <>
+          <Separator className="my-8" />
+          <PaymentsTable />
         </>
       )}
     </div>

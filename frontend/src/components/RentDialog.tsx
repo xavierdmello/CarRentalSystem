@@ -8,10 +8,12 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useState } from "react";
 import { Car } from "@/types/car";
-import { addDays, format } from "date-fns";
+import { addDays, format, differenceInDays } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
+
 interface RentDialogProps {
   car: Car;
   onSuccess?: () => void;
@@ -22,6 +24,7 @@ export function RentDialog({ car, onSuccess }: RentDialogProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [paymentMethod, setPaymentMethod] = useState("credit_card");
   const [dates, setDates] = useState({
     startDate: format(new Date(), "yyyy-MM-dd"),
     endDate: format(addDays(new Date(), 1), "yyyy-MM-dd"),
@@ -38,7 +41,8 @@ export function RentDialog({ car, onSuccess }: RentDialogProps) {
         throw new Error("Please login to rent a car");
       }
 
-      const response = await fetch("http://localhost:8000/book_rental/", {
+      // First, create the rental
+      const rentalResponse = await fetch("http://localhost:8000/book_rental/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -51,25 +55,45 @@ export function RentDialog({ car, onSuccess }: RentDialogProps) {
         }),
       });
 
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.detail || "Failed to rent car");
+      const rentalData = await rentalResponse.json();
+      if (!rentalResponse.ok) {
+        throw new Error(rentalData.detail || "Failed to rent car");
       }
 
-      if (data.success) {
-        toast({
-          title: "Car Rented Successfully",
-          description: `You have rented the ${car.make} ${car.model} from ${dates.startDate} to ${dates.endDate}.`,
-        });
-        setIsOpen(false);
-        onSuccess?.();
+      // Calculate total amount based on daily rate and rental duration
+      const days = differenceInDays(new Date(dates.endDate), new Date(dates.startDate)) + 1;
+      const totalAmount = car.daily_rent * days;
+
+      // Create the payment
+      const paymentResponse = await fetch("http://localhost:8000/add_payment/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          token: token,
+        },
+        body: JSON.stringify({
+          rental_id: parseInt(rentalData.data.rental_id),
+          amount: totalAmount,
+          payment_method: paymentMethod,
+        }),
+      });
+
+      const paymentData = await paymentResponse.json();
+      if (!paymentResponse.ok) {
+        throw new Error(paymentData.detail || "Failed to process payment");
       }
+
+      toast({
+        title: "Car Rented Successfully",
+        description: `You have rented the ${car.make} ${car.model} from ${dates.startDate} to ${dates.endDate}.`,
+      });
+      setIsOpen(false);
+      onSuccess?.();
     } catch (error) {
       toast({
         variant: "destructive",
         title: "Error Renting Car",
-        description:
-          error instanceof Error ? error.message : "Failed to rent car",
+        description: error instanceof Error ? error.message : "Failed to rent car",
       });
       setError(error instanceof Error ? error.message : "Failed to rent car");
     } finally {
@@ -98,9 +122,7 @@ export function RentDialog({ car, onSuccess }: RentDialogProps) {
               required
               disabled={isLoading}
               value={dates.startDate}
-              onChange={(e) =>
-                setDates({ ...dates, startDate: e.target.value })
-              }
+              onChange={(e) => setDates({ ...dates, startDate: e.target.value })}
             />
           </div>
           <div className="space-y-2">
@@ -113,6 +135,22 @@ export function RentDialog({ car, onSuccess }: RentDialogProps) {
               value={dates.endDate}
               onChange={(e) => setDates({ ...dates, endDate: e.target.value })}
             />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="paymentMethod">Payment Method</Label>
+            <Select
+              value={paymentMethod}
+              onValueChange={setPaymentMethod}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select payment method" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="credit_card">Credit Card</SelectItem>
+                <SelectItem value="debit_card">Debit Card</SelectItem>
+                <SelectItem value="cash">Cash</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
           <div className="pt-4">
             <Button type="submit" className="w-full" disabled={isLoading}>

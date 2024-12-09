@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 
 class PaymentAdd(BaseModel):
-    rental_id: str
+    rental_id: int
     amount: int
-    payment_method:str
+    payment_method: str
     
