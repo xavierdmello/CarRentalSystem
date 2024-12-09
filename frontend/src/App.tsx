@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Header } from "@/components/Header";
 import { ThemeProvider } from "@/components/theme-provider";
 import "./App.css";
+import { CarsGrid } from "@/components/CarsGrid";
 
 interface UserData {
   access_token: string;
@@ -38,9 +39,9 @@ function App() {
         onLogout={handleLogout}
         userData={userData}
       />
-      <div className="bg-background">
-        <h1>Hello {userData ? userData.name : "World"}</h1>
-      </div>
+      <main className="container mx-auto">
+        <CarsGrid />
+      </main>
     </ThemeProvider>
   );
 }
