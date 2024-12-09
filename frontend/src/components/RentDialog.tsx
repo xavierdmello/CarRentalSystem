@@ -11,13 +11,14 @@ import { Label } from "@/components/ui/label";
 import { useState } from "react";
 import { Car } from "@/types/car";
 import { addDays, format } from "date-fns";
-
+import { useToast } from "@/hooks/use-toast";
 interface RentDialogProps {
   car: Car;
   onSuccess?: () => void;
 }
 
 export function RentDialog({ car, onSuccess }: RentDialogProps) {
+  const { toast } = useToast();
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
@@ -56,10 +57,20 @@ export function RentDialog({ car, onSuccess }: RentDialogProps) {
       }
 
       if (data.success) {
+        toast({
+          title: "Car Rented Successfully",
+          description: `You have rented the ${car.make} ${car.model} from ${dates.startDate} to ${dates.endDate}.`,
+        });
         setIsOpen(false);
         onSuccess?.();
       }
     } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Error Renting Car",
+        description:
+          error instanceof Error ? error.message : "Failed to rent car",
+      });
       setError(error instanceof Error ? error.message : "Failed to rent car");
     } finally {
       setIsLoading(false);
@@ -73,7 +84,9 @@ export function RentDialog({ car, onSuccess }: RentDialogProps) {
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Rent {car.make} {car.model}</DialogTitle>
+          <DialogTitle>
+            Rent {car.make} {car.model}
+          </DialogTitle>
         </DialogHeader>
         {error && <p className="text-sm text-destructive">{error}</p>}
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -98,9 +111,7 @@ export function RentDialog({ car, onSuccess }: RentDialogProps) {
               required
               disabled={isLoading}
               value={dates.endDate}
-              onChange={(e) =>
-                setDates({ ...dates, endDate: e.target.value })
-              }
+              onChange={(e) => setDates({ ...dates, endDate: e.target.value })}
             />
           </div>
           <div className="pt-4">
@@ -112,4 +123,4 @@ export function RentDialog({ car, onSuccess }: RentDialogProps) {
       </DialogContent>
     </Dialog>
   );
-} 
+}

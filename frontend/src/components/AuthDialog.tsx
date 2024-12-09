@@ -19,6 +19,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Toggle } from "@/components/ui/toggle";
+import { useToast } from "@/hooks/use-toast";
 
 interface AuthDialogProps {
   onLogin?: (userData: any) => void;
@@ -31,6 +32,7 @@ interface AuthDialogProps {
 }
 
 export function AuthDialog({ onLogin, onLogout, userData }: AuthDialogProps) {
+  const { toast } = useToast()
   const [isOpen, setIsOpen] = useState(false);
   const [isLoginMode, setIsLoginMode] = useState(true);
   const [error, setError] = useState("");
@@ -69,11 +71,20 @@ export function AuthDialog({ onLogin, onLogout, userData }: AuthDialogProps) {
       }
 
       if (data.success) {
+        toast({
+          title: "Welcome Back!",
+          description: "You have successfully logged in.",
+        })
         onLogin?.(data.data);
         setIsOpen(false);
         setLoginData({ email: "", password: "" });
       }
     } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Login Failed",
+        description: error instanceof Error ? error.message : "Login failed",
+      })
       setError(error instanceof Error ? error.message : "Login failed");
     } finally {
       setIsLoading(false);
@@ -99,6 +110,10 @@ export function AuthDialog({ onLogin, onLogout, userData }: AuthDialogProps) {
       }
 
       if (data.success) {
+        toast({
+          title: "Account Created",
+          description: "Your account has been created successfully. Welcome!",
+        })
         onLogin?.(data.data);
         setIsOpen(false);
         setSignupData({
@@ -111,6 +126,11 @@ export function AuthDialog({ onLogin, onLogout, userData }: AuthDialogProps) {
         });
       }
     } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Signup Failed",
+        description: error instanceof Error ? error.message : "Signup failed",
+      })
       setError(error instanceof Error ? error.message : "Signup failed");
     } finally {
       setIsLoading(false);

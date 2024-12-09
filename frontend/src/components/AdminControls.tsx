@@ -10,8 +10,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useState } from "react";
 import { CarCreate } from "@/types/car";
+import { useToast } from "@/hooks/use-toast";
 
 export function AdminControls({ onCarAdded }: { onCarAdded: () => void }) {
+  const { toast } = useToast();
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
@@ -48,6 +50,10 @@ export function AdminControls({ onCarAdded }: { onCarAdded: () => void }) {
       }
 
       if (data.success) {
+        toast({
+          title: "Car Added Successfully",
+          description: `${carData.make} ${carData.model} has been added to the fleet.`,
+        });
         setIsOpen(false);
         setCarData({
           make: "",
@@ -62,6 +68,12 @@ export function AdminControls({ onCarAdded }: { onCarAdded: () => void }) {
         onCarAdded();
       }
     } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Error Adding Car",
+        description:
+          error instanceof Error ? error.message : "Failed to add car",
+      });
       setError(error instanceof Error ? error.message : "Failed to add car");
     } finally {
       setIsLoading(false);

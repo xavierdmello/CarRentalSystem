@@ -4,6 +4,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import "./App.css";
 import { CarsGrid } from "@/components/CarsGrid";
 import { AdminControls } from "@/components/AdminControls";
+import { Toaster } from "@/components/ui/toaster"
 
 interface UserData {
   access_token: string;
@@ -63,6 +64,7 @@ function App() {
 
   return (
     <ThemeProvider defaultTheme="light" storageKey="ui-theme">
+      <Toaster />
       <Header 
         role={role} 
         setRole={setRole} 
