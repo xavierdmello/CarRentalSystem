@@ -20,14 +20,8 @@ def get_filtered_cars(filters: carFilterParams, db: Session):
             query = query.filter(Car.category == filters.category)
         
         cars = query.all()
-        if not cars:
-         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="No Cars found for the given criteria"
-         )
         return cars
-    except HTTPException as ep:
-        raise ep
+        
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,

@@ -71,4 +71,18 @@ def return_rental(rental_id:int, db: Session):
         raise ep
     except Exception as ep:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(ep))
+
+def get_user_rentals(user_id: int, db: Session):
+    try:
+        rentals = db.query(Rental).filter(Rental.user_id == user_id).all()
+        return rentals
+    except HTTPException as ep:
+        raise ep
+    except Exception as ep:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, 
+            detail=str(ep)
+        )
+    finally:
+        db.close()
     

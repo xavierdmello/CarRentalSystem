@@ -34,11 +34,20 @@ def verify_jwt_token(token: str = Header(...)):
     
 def get_current_user(token: str):
     db = next(get_db())
-     
-    payload = verify_jwt_token(token)
-    user_id: int = payload.get("user_id")
-    user = db.query(User).filter(User.user_id== user_id).first()
-    return user
+    try:
+        # Remove 'Bearer ' prefix if present
+        if token.startswith('Bearer '):
+            token = token.split(' ')[1]
+            
+        payload = verify_jwt_token(token)
+        user_id: int = payload.get("user_id")
+        user = db.query(User).filter(User.user_id == user_id).first()
+        return user
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Could not validate credentials"
+        )
     
 def authenticated(roles=None):
     def decorator(func):

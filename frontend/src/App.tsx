@@ -25,7 +25,7 @@ function App() {
     if (token) {
       fetch("http://localhost:8000/me/", {
         headers: {
-          Authorization: `Bearer ${token}`
+          token: token || "",
         }
       })
       .then(res => res.json())

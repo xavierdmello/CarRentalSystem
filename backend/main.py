@@ -21,7 +21,7 @@ app.add_middleware(
     allow_origins=["http://localhost:5173"],  # Frontend dev server
     allow_credentials=True,
     allow_methods=["*"],
-    allow_headers=["*"],
+    allow_headers=["*", "token", "content-type"],  # Add explicit headers
 )
 
 @app.post("/signup/", status_code=status.HTTP_201_CREATED,response_model=ResponseModel)
@@ -53,9 +53,12 @@ def get_car_list(
         year=year
     )
     cars_list = car_service.get_filtered_cars(filters, db)
-    if not cars_list:
-        raise HTTPException(status_code=400, detail="cars list not fetched")
-    return {"status":200,"success":True,"message":"cars list fetched successfully","data":cars_list}
+    return {
+        "status": 200,
+        "success": True,
+        "message": "Cars list fetched successfully",
+        "data": cars_list or []
+    }
 
 @app.get("/get_car/{car_id}", response_model=CarResponseModel)
 def get_car(carId: int,db: Session = Depends(get_db)):
@@ -145,3 +148,14 @@ def get_current_user_data(token: str = Header()):
         }
     except Exception:
         raise HTTPException(status_code=401, detail="Invalid token")
+
+@app.get("/my_rentals/")
+def get_user_rentals(token: str = Header(), db: Session = Depends(get_db)):
+    user_id = get_current_user(token).user_id
+    rentals = rental_service.get_user_rentals(user_id, db)
+    return {
+        "status": 200,
+        "success": True,
+        "message": "Rentals fetched successfully",
+        "data": rentals
+    }
