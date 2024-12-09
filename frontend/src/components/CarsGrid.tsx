@@ -11,6 +11,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
 
 interface FilterParams {
   make?: string;
@@ -105,6 +106,10 @@ export function CarsGrid({ onRefresh }: { onRefresh?: () => void | number }) {
     }
   }, [onRefresh, refresh]);
 
+  const resetFilters = () => {
+    setFilters({});
+  };
+
   if (isLoading) {
     return (
       <div className="flex justify-center items-center min-h-[400px]">
@@ -123,96 +128,107 @@ export function CarsGrid({ onRefresh }: { onRefresh?: () => void | number }) {
 
   return (
     <div className="space-y-8">
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 p-4 bg-muted/50 rounded-lg">
-        <div className="space-y-2">
-          <Label htmlFor="make">Make</Label>
-          <Select
-            onValueChange={(value) =>
-              setFilters((prev) => ({ ...prev, make: value }))
-            }
-            value={filters.make}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Select make" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Makes</SelectItem>
-              {uniqueMakes.map((make) => (
-                <SelectItem key={make} value={make}>
-                  {make}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+      <div className="flex flex-col gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 p-4 bg-muted/50 rounded-lg">
+          <div className="space-y-2">
+            <Label htmlFor="make">Make</Label>
+            <Select
+              onValueChange={(value) =>
+                setFilters((prev) => ({ ...prev, make: value }))
+              }
+              value={filters.make}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select make" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Makes</SelectItem>
+                {uniqueMakes.map((make) => (
+                  <SelectItem key={make} value={make}>
+                    {make}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="model">Model</Label>
-          <Select
-            onValueChange={(value) =>
-              setFilters((prev) => ({ ...prev, model: value }))
-            }
-            value={filters.model}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Select model" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Models</SelectItem>
-              {uniqueModels.map((model) => (
-                <SelectItem key={model} value={model}>
-                  {model}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+          <div className="space-y-2">
+            <Label htmlFor="model">Model</Label>
+            <Select
+              onValueChange={(value) =>
+                setFilters((prev) => ({ ...prev, model: value }))
+              }
+              value={filters.model}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select model" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Models</SelectItem>
+                {uniqueModels.map((model) => (
+                  <SelectItem key={model} value={model}>
+                    {model}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="year">Year</Label>
-          <Select
-            onValueChange={(value) =>
-              setFilters((prev) => ({
-                ...prev,
-                year: value ? parseInt(value) : undefined,
-              }))
-            }
-            value={filters.year?.toString()}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Select year" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Years</SelectItem>
-              {uniqueYears.sort().map((year) => (
-                <SelectItem key={year} value={year.toString()}>
-                  {year}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+          <div className="space-y-2">
+            <Label htmlFor="year">Year</Label>
+            <Select
+              onValueChange={(value) =>
+                setFilters((prev) => ({
+                  ...prev,
+                  year: value ? parseInt(value) : undefined,
+                }))
+              }
+              value={filters.year?.toString()}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select year" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Years</SelectItem>
+                {uniqueYears.sort().map((year) => (
+                  <SelectItem key={year} value={year.toString()}>
+                    {year}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="category">Category</Label>
-          <Select
-            onValueChange={(value) =>
-              setFilters((prev) => ({ ...prev, category: value }))
-            }
-            value={filters.category}
+          <div className="space-y-2">
+            <Label htmlFor="category">Category</Label>
+            <Select
+              onValueChange={(value) =>
+                setFilters((prev) => ({ ...prev, category: value }))
+              }
+              value={filters.category}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select category" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Categories</SelectItem>
+                {categories.map((category) => (
+                  <SelectItem key={category} value={category}>
+                    {category === "ev" ? "EV" : category.charAt(0).toUpperCase() + category.slice(1)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+        <div className="flex justify-end">
+          <Button 
+            variant="outline" 
+            onClick={resetFilters}
+            disabled={!filters.make && !filters.model && !filters.year && !filters.category}
           >
-            <SelectTrigger>
-              <SelectValue placeholder="Select category" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Categories</SelectItem>
-              {categories.map((category) => (
-                <SelectItem key={category} value={category}>
-                  {category === "ev" ? "EV" : category.charAt(0).toUpperCase() + category.slice(1)}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+            Reset Filters
+          </Button>
         </div>
       </div>
 
