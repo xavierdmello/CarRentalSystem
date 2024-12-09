@@ -1,10 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Car, CarsResponse } from "@/types/car";
 import { CarCard } from "./CarCard";
 import { RentalCard } from "./RentalCard";
 import { Separator } from "./ui/separator";
 
-export function CarsGrid({ onRefresh }: { onRefresh?: () => void }) {
+export function CarsGrid({ onRefresh }: { onRefresh?: () => void | number }) {
   const [cars, setCars] = useState<Car[]>([]);
   const [rentals, setRentals] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -31,7 +31,10 @@ export function CarsGrid({ onRefresh }: { onRefresh?: () => void }) {
   const fetchRentals = async () => {
     try {
       const token = localStorage.getItem("token");
-      if (!token) return;
+      if (!token) {
+        setRentals([]);
+        return;
+      }
 
       const response = await fetch("http://localhost:8000/my_rentals/", {
         headers: {
@@ -55,10 +58,20 @@ export function CarsGrid({ onRefresh }: { onRefresh?: () => void }) {
     }
   };
 
-  useEffect(() => {
+  const refresh = useCallback(() => {
     fetchCars();
     fetchRentals();
-  }, [onRefresh]);
+  }, []);
+
+  useEffect(() => {
+    refresh();
+  }, [refresh]);
+
+  useEffect(() => {
+    if (onRefresh) {
+      refresh();
+    }
+  }, [onRefresh, refresh]);
 
   if (isLoading) {
     return (
