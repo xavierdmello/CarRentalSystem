@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Header } from "@/components/Header";
 import { ThemeProvider } from "@/components/theme-provider";
 import "./App.css";
@@ -18,6 +18,29 @@ interface UserData {
 function App() {
   const [role, setRole] = useState<"admin" | "user">("user");
   const [userData, setUserData] = useState<UserData | null>(null);
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      fetch("http://localhost:8000/me/", {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          setUserData(data.data);
+          setRole(data.data.role === "admin" ? "admin" : "user");
+        } else {
+          localStorage.removeItem("token");
+        }
+      })
+      .catch(() => {
+        localStorage.removeItem("token");
+      });
+    }
+  }, []);
 
   const handleLogin = (data: UserData) => {
     setUserData(data);

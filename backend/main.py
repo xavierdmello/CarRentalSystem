@@ -128,3 +128,20 @@ def get_payments(token:str = Header(),db: Session = Depends(get_db)):
     if not payments:
         raise HTTPException(status_code=400, detail="rentals not fetched")
     return {"status":200,"success":True,"message":"Payments fetched successfully","data":payments}
+
+@app.get("/me/")
+def get_current_user_data(token: str = Header()):
+    try:
+        user = get_current_user(token)
+        return {
+            "success": True,
+            "data": {
+                "user_id": user.user_id,
+                "role": user.role.value,
+                "email": user.email,
+                "phone_number": user.phone_number,
+                "name": user.name
+            }
+        }
+    except Exception:
+        raise HTTPException(status_code=401, detail="Invalid token")
