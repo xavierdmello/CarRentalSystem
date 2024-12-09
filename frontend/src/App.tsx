@@ -3,6 +3,7 @@ import { Header } from "@/components/Header";
 import { ThemeProvider } from "@/components/theme-provider";
 import "./App.css";
 import { CarsGrid } from "@/components/CarsGrid";
+import { AdminControls } from "@/components/AdminControls";
 
 interface UserData {
   access_token: string;
@@ -40,6 +41,7 @@ function App() {
         userData={userData}
       />
       <main className="container mx-auto">
+        {role === "admin" && <AdminControls />}
         <CarsGrid />
       </main>
     </ThemeProvider>

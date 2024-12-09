@@ -16,4 +16,15 @@ export interface CarsResponse {
   success: boolean;
   message: string;
   data: Car[];
+}
+
+export interface CarCreate {
+  make: string;
+  model: string;
+  year: number;
+  category: string;
+  registration_number: number;
+  status: string;
+  daily_rent: number;
+  image_url: string;
 } 
