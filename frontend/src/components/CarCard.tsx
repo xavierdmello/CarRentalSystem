@@ -1,13 +1,14 @@
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Car } from "@/types/car";
 import { Badge } from "@/components/ui/badge";
-
+import { Car } from "@/types/car";
+import { RentDialog } from "./RentDialog";
+import { Button } from "@/components/ui/button";
 interface CarCardProps {
   car: Car;
+  onRented?: () => void;
 }
 
-export function CarCard({ car }: CarCardProps) {
+export function CarCard({ car, onRented }: CarCardProps) {
   return (
     <Card className="overflow-hidden">
       <CardHeader className="p-0">
@@ -36,9 +37,13 @@ export function CarCard({ car }: CarCardProps) {
         </div>
       </CardContent>
       <CardFooter className="p-4 pt-0">
-        <Button className="w-full" disabled={car.status !== "available"}>
-          {car.status === "available" ? "Rent Now" : "Not Available"}
-        </Button>
+        {car.status === "available" ? (
+          <RentDialog car={car} onSuccess={onRented} />
+        ) : (
+          <Button className="w-full" disabled>
+            Not Available
+          </Button>
+        )}
       </CardFooter>
     </Card>
   );
