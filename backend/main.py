@@ -1,4 +1,5 @@
 from fastapi import FastAPI, status, Depends,HTTPException,Header
+from fastapi.middleware.cors import CORSMiddleware
 from backend.schemas.user import ResponseModel, UserCreate,UserLogin
 from backend.schemas.car import CarResponse, carFilterParams,CarResponseModel,CarCreate,CarBookRequest
 from backend.schemas.payment import PaymentAdd
@@ -13,6 +14,15 @@ from backend.model import Car
 from typing import Optional
 
 app = FastAPI()
+
+# Add CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"],  # Frontend dev server
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.post("/signup/", status_code=status.HTTP_201_CREATED,response_model=ResponseModel)
 def sign_up(user: UserCreate, db: Session = Depends(get_db)):
